@@ -26,6 +26,6 @@ do
         exit 1
     fi
 
-    echo "printing $n elements"
     srun ./print-n $n $wdir/ex1.dat ascii
+    echo "Printing $n elements"
 done

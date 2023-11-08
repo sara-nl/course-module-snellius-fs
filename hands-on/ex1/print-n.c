@@ -46,7 +46,7 @@ int main(int argc, char** argv){
         return 1;
     }
 
-    int n = atoi(argv[1]);
+    long int n = atoi(argv[1]);
     const char* filename = argv[2];
     const char* format = argv[3];
 
@@ -83,9 +83,9 @@ int main(int argc, char** argv){
     double data_size = (double)(sizeof(double)*n)/(1.0e6); // Data size in MB
     double transfer_rate = data_size/elapsed_time; // Data transfer rate in MB/s
 
-    printf("%d random double-precision values written to %s in %s format\n", n, filename, format);
+    printf("%ld random double-precision values written to %s in %s format\n", n, filename, format);
     printf(" Elapsed time [s]: %.6f\n", elapsed_time);
-    printf(" Buffer size [MB]:%d\n", sizeof(double)*n);
+    printf(" Buffer size [MB]: %ld\n", sizeof(double)*n);
     printf(" Transfer rate [MB/s]: %.6f\n", transfer_rate);
 
     free(array);
