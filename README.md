@@ -100,7 +100,7 @@ Next, use the script below to launch a job that lists the contents of `$TMPDIR`,
 
 ls -l $TMPDIR
 touch "$TMPDIR/testfile.foo"
-hostname > $TMPDIR/testfile.foo
+hostname > "$TMPDIR/testfile.foo"
 ls -l $TMPDIR
 echo $TMPDIR
 realpath $TMPDIR
@@ -136,3 +136,27 @@ drwxr-xr-x 2 scur1448 scur1448 4096 Nov  9 00:19 /gpfs/scratch1/nodespecific/tcn
 drwxr-xr-x 2 scur1448 scur1448 4096 Nov  9 00:25 /gpfs/scratch1/nodespecific/tcn386/scur1448.4401218
 drwxr-xr-x 2 scur1448 scur1448 4096 Nov  9 00:25 /gpfs/scratch1/nodespecific/tcn386/scur1448.4401219
 ```
+
+### Scratch-node
+The scratch-node behavior is technically similar to scratch-local. For each assigned node, a user-specific partition is created and mounted under `/scratch-node`. The environment variable `$TMPDIR` points to the user-specific directory within `/scratch-node`, which should be used within your job. However, there are some differences that are worth noting:
+1. Scratch-node operates on NVMe-based storage and is physically located on the node itself.
+2. When a user's job is completed, their respective file system mounted under `/scratch-node` will be automatically removed. Therefore, it's essential to copy your data from `$TMPDIR` to a more permanent location at the end of your job script.
+3. There are no quotas imposed on `/scratch-node`, and no backup policy is in place. Users should exercise caution in data management.
+
+Please be aware that when requesting a shared node, you will only receive a portion of the local NVMe disk, such as 25%, 50%, or 75%, depending on the requested job resources.
+
+Scratch-node is available on a subset of Snellius nodes. To secure a node with the scratch-node file system, you may use the `--constraint=scratch-node` flag in your job configuration.
+
+#### Exercise
+Modify the script above to launch a job that creates a file on scratch-node and displays the file's real path.
+
+```
+#!/bin/bash
+#SBATCH -J scratch-node-test
+#SBATCH -t 5
+#SBATCH -p thin_course
+#SBATCH --constraint=scratch-node
+
+touch "$TMPDIR/testfile-scratch-node.foo"
+echo "This is a file on scratch-node" > "$TMPDIR/testfile-scratch-node.foo"
+realpath "$TMPDIR/testfile-scratch-node.foo"
