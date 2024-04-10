@@ -1,11 +1,13 @@
 #!/bin/bash
 #SBATCH -J ex1      # Job name
-#SBATCH -p thin     # Specify your partition or queue name
+#SBATCH -p rome     # Specify your partition or queue name
 #SBATCH -t 00:15:00 # Max runtime in format HH:MM:SS
 
 module load 2022
 
-gcc print-n.c -o print-n.out
+exec_name=print-n.out
+
+gcc print-n.c -o ${exec_name}
 
 # Array lenght <n> is calculated as 10**i
 #  Use ibeg and iend to tune the range of i
@@ -26,6 +28,6 @@ do
         exit 1
     fi
 
-    srun ./print-n $n $wdir/ex1.dat ascii
+    srun ${exec_name} $n $wdir/ex1.dat ascii
     echo "Printing $n elements"
 done
