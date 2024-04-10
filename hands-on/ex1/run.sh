@@ -3,7 +3,8 @@
 #SBATCH -p rome     # Specify your partition or queue name
 #SBATCH -t 00:15:00 # Max runtime in format HH:MM:SS
 
-module load 2022
+module load 2023
+module load GCC/12.3.0
 
 exec_name=print-n.out
 
