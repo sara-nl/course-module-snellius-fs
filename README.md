@@ -160,3 +160,99 @@ Modify the script above to launch a job that creates a file on scratch-node and 
 touch "$TMPDIR/testfile-scratch-node.foo"
 echo "This is a file on scratch-node" > "$TMPDIR/testfile-scratch-node.foo"
 realpath "$TMPDIR/testfile-scratch-node.foo"
+```
+
+#### Advanced exercise: Creating large file sets and evaluating transfers
+
+##### Objective
+- Learn how to generate large numbers of files with random data.
+- Compare the efficiency of transferring these files as individual files versus transferring them as an archive between different file systems (e.g., home and scratch).
+
+##### Set-up guide
+
+1. **Create a directory for the test**:
+   - Create a directory to store the random files: 
+     ```bash
+     mkdir ~/file_transfer_test
+     cd ~/file_transfer_test
+     ```
+
+2. **Generate random files**:
+   - Use a `for` loop to create 1000 files, each with random data.
+   - You can use the `dd` command or `head` with `/dev/urandom` to generate files with random data. Here's an example of creating 1000 files with 1 MB of random data each:
+     ```bash
+     for i in {1..1000}; do
+         head -c 1M </dev/urandom > file_$i.bin
+     done
+     ```
+   - **Explain**: This loop generates 1000 binary files (`file_1.bin`, `file_2.bin`, ..., `file_1000.bin`), each with 1 MB of random data.
+
+3. **Check the size of the directory**:
+   - After creating the files, check the total size of the directory:
+     ```bash
+     du -sh ~/file_transfer_test
+     ```
+   This gives you an idea of how much data will be transferred.
+
+##### Moving the files between file systems
+
+Now, we'll move these files between different file systems (e.g., from **home** to **scratch** or **project**) in two different ways: 
+1. Moving the individual files.
+2. Moving a compressed archive of the files.
+
+1. **Transfer as individual files**:
+   - First, move the files individually:
+     ```bash
+     cp -r ~/file_transfer_test /path/to/scratch/
+     ```
+   - Use `time` to measure how long the transfer takes:
+     ```bash
+     time cp -r ~/file_transfer_test /path/to/scratch/
+     ```
+
+2. **Transfer as an archive**:
+   - Archive and compress the directory using `tar` and `gzip`:
+     ```bash
+     tar -czf file_transfer_test.tar.gz ~/file_transfer_test
+     ```
+   - Measure the size of the compressed archive:
+     ```bash
+     du -sh file_transfer_test.tar.gz
+     ```
+   - Now, transfer the archive to the **scratch** directory:
+     ```bash
+     time cp file_transfer_test.tar.gz /path/to/scratch/
+     ```
+
+3. **Extract the archive in the scratch directory**:
+   - Once the transfer is complete, extract the archive in the scratch directory to restore the files:
+     ```bash
+     cd /path/to/scratch/
+     tar -xzf file_transfer_test.tar.gz
+     ```
+
+##### Evaluate the performance
+
+1. **Compare transfer times**:
+   - Review the `time` command outputs from both transfers (individual files vs. archive).
+   - Discuss how much time it took to transfer the files as individual files versus as a compressed archive.
+
+2. **Compare data size**:
+   - Check the total size of the original directory and the compressed archive. Highlight the difference in storage requirements and transfer speeds based on compression.
+
+3. **Discuss trade-offs**:
+   - **When to use individual file transfers**: If you're working with a small number of files or if they will be used directly without further processing.
+   - **When to use archived file transfers**: Compressing many small files reduces both disk space usage and transfer time due to fewer I/O operations.
+
+4. **Advanced considerations**:
+   - Discuss how these operations scale using larger directories or more complex file systems.
+   - Introduce the concept of **I/O bottlenecks** in HPC and why proper file management is crucial when working with large data sets.
+
+##### Clean-up
+
+- After the hands-on session, guide the participants to clean up the directories and files to free up space on the system:
+  ```bash
+  rm -r ~/file_transfer_test
+  rm ~/file_transfer_test.tar.gz
+  rm -r /path/to/scratch/file_transfer_test
+  rm /path/to/scratch/file_transfer_test.tar.gz
